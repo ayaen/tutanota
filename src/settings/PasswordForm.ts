@@ -9,6 +9,7 @@ import {StatusField} from "../gui/base/StatusField"
 import {LoginController} from "../api/main/LoginController"
 import {assertMainOrNode} from "../api/common/Env"
 import {getEnabledMailAddressesForGroupInfo} from "../api/common/utils/GroupUtils.js"
+import {UsageTest} from "@tutao/tutanota-usagetests"
 
 assertMainOrNode()
 
@@ -28,12 +29,25 @@ export class PasswordModel {
 	private oldPassword = ""
 	private repeatedPassword = ""
 	private passwordStrength: number
+	private readonly __mailValid?: Stream<boolean>
+	private __signupFreeTest?: UsageTest
 
 	constructor(
 		private readonly logins: LoginController,
 		readonly config: PasswordModelConfig,
+		mailValid?: Stream<boolean>,
 	) {
 		this.passwordStrength = this.calculatePasswordStrength()
+
+		this.__mailValid = mailValid
+		this.__signupFreeTest = locator.usageTestController.getTest("signup.free")
+	}
+
+	_checkBothValidAndSendPing() {
+		if (this.getNewPasswordStatus().type === "valid" && this.getRepeatedPasswordStatus() === "valid") {
+			// Password entry (both passwords entered and valid)
+			this.__signupFreeTest?.getStage(3).complete()
+		}
 	}
 
 	getNewPassword(): string {
@@ -41,8 +55,15 @@ export class PasswordModel {
 	}
 
 	setNewPassword(newPassword: string) {
+		if (this.__mailValid && this.__mailValid()) {
+			// Email address selection finished (email address is available and clicked in password field)
+			this.__signupFreeTest?.getStage(2).complete()
+		}
+
 		this.newPassword = newPassword
 		this.passwordStrength = this.calculatePasswordStrength()
+
+		this._checkBothValidAndSendPing()
 	}
 
 	getOldPassword(): string {
@@ -61,6 +82,8 @@ export class PasswordModel {
 	setRepeatedPassword(repeatedPassword: string) {
 		this.repeatedPassword = repeatedPassword
 		this.passwordStrength = this.calculatePasswordStrength()
+
+		this._checkBothValidAndSendPing()
 	}
 
 	clear() {
