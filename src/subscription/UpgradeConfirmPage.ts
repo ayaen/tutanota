@@ -22,11 +22,15 @@ import {ofClass} from "@tutao/tutanota-utils"
 import {locator} from "../api/main/MainLocator"
 import {deleteCampaign} from "../misc/LoginUtils"
 import {SwitchAccountTypeService} from "../api/entities/sys/Services"
+import {UsageTest} from "@tutao/tutanota-usagetests"
 
 export class UpgradeConfirmPage implements WizardPageN<UpgradeSubscriptionData> {
 	private dom!: HTMLElement
+	private __signupPaidTest?: UsageTest
 
 	oncreate(vnode: VnodeDOM<WizardPageAttrs<UpgradeSubscriptionData>>) {
+		this.__signupPaidTest = locator.usageTestController.getTest("signup.paid")
+
 		this.dom = vnode.dom as HTMLElement
 	}
 
@@ -64,6 +68,14 @@ export class UpgradeConfirmPage implements WizardPageN<UpgradeSubscriptionData> 
 		)
 			.then(() => {
 				deleteCampaign()
+				// Order confirmation (click on Buy), send selected payment method as an enum
+				const orderConfirmationStage = this.__signupPaidTest?.getStage(5)
+				orderConfirmationStage?.setMetric({
+					name: "paymentMethod",
+					value: data.paymentData.paymentMethod,
+				})
+				orderConfirmationStage?.complete()
+
 				return this.close(data, this.dom)
 			})
 			.catch(ofClass(PreconditionFailedError, e => {
