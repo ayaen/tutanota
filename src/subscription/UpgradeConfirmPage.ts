@@ -5,7 +5,7 @@ import {lang} from "../misc/LanguageViewModel"
 import {formatPriceWithInfo, getPaymentMethodName, isYearlyPayment} from "./PriceUtils"
 import {HabReminderImage} from "../gui/base/icons/Icons"
 import {createSwitchAccountTypeData} from "../api/entities/sys/TypeRefs.js"
-import {AccountType, Const, PaidSubscriptionType} from "../api/common/TutanotaConstants"
+import {AccountType, Const, PaidSubscriptionType, PaymentMethodTypeToName} from "../api/common/TutanotaConstants"
 import {showProgressDialog} from "../gui/dialogs/ProgressDialog"
 import {HttpMethod} from "../api/common/EntityFunctions"
 import type {UpgradeSubscriptionData} from "./UpgradeSubscriptionWizard"
@@ -72,7 +72,7 @@ export class UpgradeConfirmPage implements WizardPageN<UpgradeSubscriptionData> 
 				const orderConfirmationStage = this.__signupPaidTest?.getStage(5)
 				orderConfirmationStage?.setMetric({
 					name: "paymentMethod",
-					value: data.paymentData.paymentMethod,
+					value: PaymentMethodTypeToName[data.paymentData.paymentMethod],
 				})
 				orderConfirmationStage?.complete()
 
