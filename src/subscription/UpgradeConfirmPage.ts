@@ -7,7 +7,6 @@ import {HabReminderImage} from "../gui/base/icons/Icons"
 import {createSwitchAccountTypeData} from "../api/entities/sys/TypeRefs.js"
 import {AccountType, Const, PaidSubscriptionType, PaymentMethodTypeToName} from "../api/common/TutanotaConstants"
 import {showProgressDialog} from "../gui/dialogs/ProgressDialog"
-import {HttpMethod} from "../api/common/EntityFunctions"
 import type {UpgradeSubscriptionData} from "./UpgradeSubscriptionWizard"
 import {BadGatewayError, PreconditionFailedError} from "../api/common/error/RestError"
 import {RecoverCodeField} from "../settings/RecoverCodeDialog"
@@ -27,9 +26,11 @@ import {UsageTest} from "@tutao/tutanota-usagetests"
 export class UpgradeConfirmPage implements WizardPageN<UpgradeSubscriptionData> {
 	private dom!: HTMLElement
 	private __signupPaidTest?: UsageTest
+	private __signupFreeTest?: UsageTest
 
 	oncreate(vnode: VnodeDOM<WizardPageAttrs<UpgradeSubscriptionData>>) {
 		this.__signupPaidTest = locator.usageTestController.getTest("signup.paid")
+		this.__signupFreeTest = locator.usageTestController.getTest("signup.free")
 
 		this.dom = vnode.dom as HTMLElement
 	}
@@ -73,6 +74,10 @@ export class UpgradeConfirmPage implements WizardPageN<UpgradeSubscriptionData> 
 				orderConfirmationStage?.setMetric({
 					name: "paymentMethod",
 					value: PaymentMethodTypeToName[data.paymentData.paymentMethod],
+				})
+				orderConfirmationStage?.setMetric({
+					name: "switchedFromFree",
+					value: (this.__signupFreeTest?.isStarted() ?? false).toString(),
 				})
 				orderConfirmationStage?.complete()
 
