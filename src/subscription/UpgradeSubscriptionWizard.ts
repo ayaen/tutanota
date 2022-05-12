@@ -22,7 +22,7 @@ import {SignupPage, SignupPageAttrs} from "./SignupPage"
 import {assertMainOrNode} from "../api/common/Env"
 import {getCampaignFromLocalStorage} from "../misc/LoginUtils"
 import {locator} from "../api/main/MainLocator"
-import {TtlBehavior} from "../misc/UsageTestModel"
+import {StorageBehavior, TtlBehavior} from "../misc/UsageTestModel"
 import {UpgradePriceService} from "../api/entities/sys/Services.js"
 
 assertMainOrNode()
@@ -140,7 +140,10 @@ export function showUpgradeWizard(): void {
 }
 
 export async function loadSignupWizard(subscriptionParameters: SubscriptionParameters | null, campaign: string | null): Promise<Dialog> {
-	locator.usageTestController.setTests(await locator.usageTestModel.loadActiveUsageTests(TtlBehavior.UpToDateOnly))
+	const usageTestModel = locator.usageTestModel
+
+	usageTestModel.setStorageBehavior(StorageBehavior.Ephemeral)
+	locator.usageTestController.setTests(await usageTestModel.loadActiveUsageTests(TtlBehavior.UpToDateOnly))
 
 	const prices = await loadUpgradePrices(campaign)
 	const planPrices: SubscriptionPlanPrices = {

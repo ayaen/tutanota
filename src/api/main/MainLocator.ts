@@ -13,7 +13,7 @@ import {EntityClient} from "../common/EntityClient"
 import type {CalendarModel} from "../../calendar/model/CalendarModel"
 import {CalendarModelImpl} from "../../calendar/model/CalendarModel"
 import type {DeferredObject} from "@tutao/tutanota-utils"
-import {defer, downcast} from "@tutao/tutanota-utils"
+import {defer} from "@tutao/tutanota-utils"
 import {ProgressTracker} from "./ProgressTracker"
 import {MinimizedMailEditorViewModel} from "../../mail/model/MinimizedMailEditorViewModel"
 import {SchedulerImpl} from "../common/utils/Scheduler.js"
@@ -51,7 +51,7 @@ import {ExposedNativeInterface, ExposedWebInterface} from "../../native/common/N
 import {IWebauthn} from "../../misc/2fa/webauthn/IWebauthn.js"
 import {BrowserWebauthn} from "../../misc/2fa/webauthn/BrowserWebauthn.js"
 import {UsageTestController} from "@tutao/tutanota-usagetests"
-import {UsageTestModel} from "../../misc/UsageTestModel"
+import {EphemeralUsageTestStorage, StorageBehavior, UsageTestModel} from "../../misc/UsageTestModel"
 import {deviceConfig} from "../../misc/DeviceConfig"
 import {IServiceExecutor} from "../common/ServiceRequest.js"
 import {BlobFacade} from "../worker/facades/BlobFacade"
@@ -314,8 +314,12 @@ class MainLocator implements IMainLocator {
 		this.loginListener = new LoginListener(this.secondFactorHandler)
 		this.credentialsProvider = await createCredentialsProvider(deviceEncryptionFacade, this._nativeInterfaces?.native ?? null, isDesktop() ? this.interWindowEventBus : null)
 		this.mailModel = new MailModel(notifications, this.eventController, this.worker, this.mailFacade, this.entityClient)
+
 		this.usageTestModel = new UsageTestModel(
-			deviceConfig, {
+			{
+				[StorageBehavior.Persist]: deviceConfig,
+				[StorageBehavior.Ephemeral]: new EphemeralUsageTestStorage(),
+			}, {
 				now(): number {
 					return Date.now()
 				},
