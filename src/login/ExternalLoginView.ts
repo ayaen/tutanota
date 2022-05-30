@@ -20,7 +20,7 @@ import {CurrentView, header} from "../gui/Header.js"
 import {GENERATED_MIN_ID} from "../api/common/utils/EntityUtils"
 import {getLoginErrorMessage, handleExpectedLoginError} from "../misc/LoginUtils"
 import {locator} from "../api/main/MainLocator"
-import type {ICredentialsProvider} from "../misc/credentials/CredentialsProvider"
+import type {CredentialsProvider} from "../misc/credentials/CredentialsProvider.js"
 import {assertMainOrNode} from "../api/common/Env"
 import type {Credentials} from "../misc/credentials/Credentials"
 import {SessionType} from "../api/common/SessionType.js";
@@ -29,7 +29,7 @@ import {ResumeSessionErrorReason} from "../api/worker/facades/LoginFacade"
 assertMainOrNode()
 
 export class ExternalLoginView implements CurrentView {
-	private readonly _credentialsProvider: ICredentialsProvider
+	private readonly _credentialsProvider: CredentialsProvider
 	private _password: Stream<string>
 	private _savePassword: Stream<boolean>
 	private _helpText: TranslationText

@@ -41,7 +41,7 @@ import {TextFieldAttrs, TextFieldN} from "../../gui/base/TextFieldN"
 import {getByAbbreviation} from "../../api/common/CountryList"
 import {isSameId} from "../../api/common/utils/EntityUtils"
 import {ofClass} from "@tutao/tutanota-utils"
-import type {CredentialsInfo} from "../../misc/credentials/CredentialsProvider"
+import type {CredentialsInfo} from "../../misc/credentials/CredentialsProvider.js"
 import Stream from "mithril/stream";
 import {downcast} from "@tutao/tutanota-utils";
 import {SessionType} from "../../api/common/SessionType.js";

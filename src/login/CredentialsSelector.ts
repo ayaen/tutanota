@@ -1,6 +1,6 @@
 import m, {Children, Component, Vnode} from "mithril"
 import {ButtonN, ButtonType} from "../gui/base/ButtonN"
-import type {CredentialsInfo} from "../misc/credentials/CredentialsProvider"
+import type {CredentialsInfo} from "../misc/credentials/CredentialsProvider.js"
 
 export type CredentialsSelectorAttrs = {
 	credentials: ReadonlyArray<CredentialsInfo>

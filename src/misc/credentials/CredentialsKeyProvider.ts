@@ -1,4 +1,4 @@
-import type {CredentialsStorage} from "./CredentialsProvider"
+import type {CredentialsStorage} from "./CredentialsProvider.js"
 import type {DeviceEncryptionFacade} from "../../api/worker/facades/DeviceEncryptionFacade"
 import {Request} from "../../api/common/MessageDispatcher"
 import {base64ToUint8Array, uint8ArrayToBase64} from "@tutao/tutanota-utils"
