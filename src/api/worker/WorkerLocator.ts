@@ -1,4 +1,4 @@
-import {LoginFacadeImpl} from "./facades/LoginFacade"
+import {LoginFacade} from "./facades/LoginFacade"
 import type {WorkerImpl} from "./WorkerImpl"
 import {Indexer} from "./search/Indexer"
 import type {EntityRestInterface} from "./rest/EntityRestClient"
@@ -59,7 +59,7 @@ assertWorkerOrNode()
 
 export type WorkerLocatorType = {
 	serviceExecutor: IServiceExecutor
-	login: LoginFacadeImpl
+	login: LoginFacade
 	user: UserFacade
 	indexer: Indexer
 	cache: EntityRestInterface
@@ -146,7 +146,7 @@ export async function initLocator(worker: WorkerImpl, browserData: BrowserData) 
 	const mainInterface = worker.getMainInterface()
 
 	locator.crypto = new CryptoFacadeImpl(locator.user, locator.cachingEntityClient, locator.restClient, locator.rsa, locator.serviceExecutor)
-	locator.login = new LoginFacadeImpl(
+	locator.login = new LoginFacade(
 		worker,
 		locator.restClient,
 		/**

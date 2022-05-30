@@ -11,7 +11,7 @@ import {
 } from "@tutao/tutanota-utils"
 import type {GiftCardRedeemGetReturn} from "../../entities/sys/TypeRefs.js"
 import {createGiftCardCreateData, createGiftCardRedeemData, GiftCard} from "../../entities/sys/TypeRefs.js"
-import type {LoginFacadeImpl} from "./LoginFacade"
+import type {LoginFacade} from "./LoginFacade"
 import {aes128RandomKey, base64ToKey, bitArrayToUint8Array, encryptKey, sha256Hash} from "@tutao/tutanota-crypto"
 import {IServiceExecutor} from "../../common/ServiceRequest"
 import {GiftCardRedeemService, GiftCardService} from "../../entities/sys/Services"
