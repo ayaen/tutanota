@@ -5,7 +5,7 @@ import type {EntityRestInterface} from "./rest/EntityRestClient"
 import {EntityRestClient} from "./rest/EntityRestClient"
 import {UserManagementFacade} from "./facades/UserManagementFacade"
 import {EntityRestCache} from "./rest/EntityRestCache"
-import {GroupManagementFacadeImpl} from "./facades/GroupManagementFacade"
+import {GroupManagementFacade} from "./facades/GroupManagementFacade"
 import {MailFacade} from "./facades/MailFacade"
 import {MailAddressFacade} from "./facades/MailAddressFacade"
 import {FileFacade} from "./facades/FileFacade"
@@ -65,7 +65,7 @@ export type WorkerLocatorType = {
 	cache: EntityRestInterface
 	cachingEntityClient: EntityClient
 	search: SearchFacade
-	groupManagement: GroupManagementFacadeImpl
+	groupManagement: GroupManagementFacade
 	userManagement: UserManagementFacade
 	customer: CustomerFacade
 	file: FileFacade
@@ -167,7 +167,7 @@ export async function initLocator(worker: WorkerImpl, browserData: BrowserData) 
 	]
 	locator.search = new SearchFacade(locator.user, locator.indexer.db, locator.indexer._mail, suggestionFacades, browserData, locator.cachingEntityClient)
 	locator.counters = new CounterFacade(locator.serviceExecutor)
-	locator.groupManagement = new GroupManagementFacadeImpl(locator.user, locator.counters, locator.cachingEntityClient, locator.rsa, locator.serviceExecutor)
+	locator.groupManagement = new GroupManagementFacade(locator.user, locator.counters, locator.cachingEntityClient, locator.rsa, locator.serviceExecutor)
 	locator.userManagement = new UserManagementFacade(
 		worker,
 		locator.user,
