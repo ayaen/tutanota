@@ -21,7 +21,7 @@ import {ShareFacade} from "./facades/ShareFacade"
 import {RestClient} from "./rest/RestClient"
 import {SuspensionHandler} from "./SuspensionHandler"
 import {EntityClient} from "../common/EntityClient"
-import {GiftCardFacadeImpl} from "./facades/GiftCardFacade"
+import {GiftCardFacade} from "./facades/GiftCardFacade"
 import {ConfigurationDatabase} from "./facades/ConfigurationDatabase"
 import type {ContactFormFacade} from "./facades/ContactFormFacade"
 import {ContactFormFacadeImpl} from "./facades/ContactFormFacade"
@@ -80,7 +80,7 @@ export type WorkerLocatorType = {
 	Const: Record<string, any>
 	share: ShareFacade
 	restClient: RestClient
-	giftCards: GiftCardFacadeImpl
+	giftCards: GiftCardFacade
 	configFacade: ConfigurationDatabase
 	contactFormFacade: ContactFormFacade
 	deviceEncryptionFacade: DeviceEncryptionFacade
@@ -217,7 +217,7 @@ export async function initLocator(worker: WorkerImpl, browserData: BrowserData) 
 	locator.login.init(locator.indexer, locator.eventBusClient)
 	locator.Const = Const
 	locator.share = new ShareFacade(locator.user, locator.crypto, locator.serviceExecutor, locator.cachingEntityClient)
-	locator.giftCards = new GiftCardFacadeImpl(locator.user, locator.serviceExecutor, locator.crypto)
+	locator.giftCards = new GiftCardFacade(locator.user, locator.serviceExecutor, locator.crypto)
 	locator.configFacade = new ConfigurationDatabase(locator.user)
 	locator.contactFormFacade = new ContactFormFacadeImpl(locator.restClient, locator.instanceMapper)
 	locator.deviceEncryptionFacade = new Aes256DeviceEncryptionFacade()

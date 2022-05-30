@@ -19,22 +19,10 @@ import {elementIdPart, GENERATED_MAX_ID} from "../../common/utils/EntityUtils"
 import {CryptoFacade} from "../crypto/CryptoFacade"
 import {UserFacade} from "./UserFacade"
 
-export interface GiftCardFacade {
-	generateGiftCard(message: string, value: NumberString, countryCode: string): Promise<IdTuple>
-
-	getGiftCardInfo(id: Id, key: string): Promise<GiftCardRedeemGetReturn>
-
-	redeemGiftCard(id: Id, key: string): Promise<void>
-
-	encodeGiftCardToken(giftCard: GiftCard): Promise<string>
-
-	decodeGiftCardToken(token: string): Promise<{id: Id, key: Base64}>
-}
-
 const ID_LENGTH = GENERATED_MAX_ID.length
 const KEY_LENGTH_B64 = 24
 
-export class GiftCardFacadeImpl implements GiftCardFacade {
+export class GiftCardFacade {
 	constructor(
 		private readonly user: UserFacade,
 		private readonly serviceExecutor: IServiceExecutor,
