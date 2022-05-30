@@ -242,26 +242,6 @@ export class DesktopSettingsViewer implements UpdatableSettingsViewer {
 			disabled: true,
 		}
 
-		const setOfflineStorageAttrs: DropDownSelectorAttrs<any> = {
-			label: "offlineStorage_label",
-			helpLabel: undefined,
-			items: [
-				{
-					name: lang.get("activated_label"),
-					value: true,
-				},
-				{
-					name: lang.get("deactivated_label"),
-					value: false,
-				},
-			],
-			selectedValue: this._offlineStorageValue(),
-			selectionChangedHandler: (v) => {
-				this._offlineStorageValue(v)
-				this.updateConfigBoolean(DesktopConfigKey.offlineStorageEnabled, v)
-			}
-
-		}
 		return [
 			m("#user-settings.fill-absolute.scroll.plr-l.pb-xl", [
 				m(".h4.mt-l", lang.get("desktopSettings_label")),
@@ -277,7 +257,6 @@ export class DesktopSettingsViewer implements UpdatableSettingsViewer {
 				// AppImage is kind of a portable install so we optionally add desktop icons etc
 				env.platformId === "linux" ? m(DropDownSelectorN, setDesktopIntegrationAttrs) : null,
 				this._showAutoUpdateOption ? m(DropDownSelectorN, setAutoUpdateAttrs) : null,
-				m(DropDownSelectorN, setOfflineStorageAttrs),
 			]),
 		]
 	}
@@ -312,7 +291,6 @@ export class DesktopSettingsViewer implements UpdatableSettingsViewer {
 			enableAutoUpdate,
 			mailExportMode,
 			spellcheckLabel,
-			offlineStorage,
 		] = await Promise.all([
 			locator.systemApp.getIntegrationInfo(),
 			locator.systemApp.getConfigValue(DesktopConfigKey.defaultDownloadPath),
@@ -321,7 +299,6 @@ export class DesktopSettingsViewer implements UpdatableSettingsViewer {
 			locator.systemApp.getConfigValue(DesktopConfigKey.enableAutoUpdate),
 			locator.systemApp.getConfigValue(DesktopConfigKey.mailExportMode),
 			getCurrentSpellcheckLanguageLabel(),
-			locator.systemApp.getConfigValue(DesktopConfigKey.offlineStorageEnabled),
 		])
 		const {isMailtoHandler, isAutoLaunchEnabled, isIntegrated, isUpdateAvailable} = integrationInfo
 
@@ -344,8 +321,6 @@ export class DesktopSettingsViewer implements UpdatableSettingsViewer {
 		this._mailExportMode(mailExportMode)
 
 		this._spellCheckLang(spellcheckLabel)
-
-		this._offlineStorageValue(offlineStorage)
 
 		m.redraw()
 	}
