@@ -3,15 +3,15 @@ import type {HtmlSanitizer} from "../misc/HtmlSanitizer"
 import stream from "mithril/stream"
 import Stream from "mithril/stream"
 import {assertMainOrNodeBoot, isApp, isDesktop} from "../api/common/Env"
-import {downcast, findAndRemove, LazyLoaded, mapAndFilterNull, neverNull, typedValues} from "@tutao/tutanota-utils"
+import {downcast, findAndRemove, LazyLoaded, mapAndFilterNull, typedValues} from "@tutao/tutanota-utils"
 import m from "mithril"
 import type {BaseThemeId, Theme, ThemeId} from "./theme"
 import {logo_text_bright_grey, logo_text_dark_grey, themes} from "./builtinThemes"
 import type {ThemeCustomizations} from "../misc/WhitelabelCustomizations"
 import {getWhitelabelCustomizations} from "../misc/WhitelabelCustomizations"
 import {getLogoSvg} from "./base/Logo"
-import {ThemeFacade} from "../native/common/generatedipc/ThemeFacade"
-import {ThemeFacadeSendDispatcher} from "../native/common/generatedipc/ThemeFacadeSendDispatcher"
+import type {ThemeFacade} from "../native/common/generatedipc/ThemeFacade"
+import type {ThemeFacadeSendDispatcher} from "../native/common/generatedipc/ThemeFacadeSendDispatcher.js"
 
 assertMainOrNodeBoot()
 
@@ -214,7 +214,10 @@ export class NativeThemeFacade implements ThemeFacade {
 
 	constructor() {
 		this.themeFacade = new LazyLoaded<ThemeFacadeSendDispatcher>(async () => {
-			const {locator} = await import("../api/main/MainLocator")
+			const [{locator}, {ThemeFacadeSendDispatcher}] = await Promise.all([
+				import("../api/main/MainLocator"),
+				import("../native/common/generatedipc/ThemeFacadeSendDispatcher")
+			])
 			// Theme initialization happens concurrently with locator initialization,
 			// so we have to wait or native may not yet be defined when we first get here.
 			// It would be nice to move all the global theme handling onto the locator as

@@ -2,7 +2,7 @@
   "name": "@tutao/licc",
   "version": "0.0.1",
   "bin": {
-	"licc": "dist/cli.js"
+	"licc": "./dist/cli.js"
   },
   "description": "little interface compiler",
   "main": "index.js",
@@ -11,7 +11,17 @@
 	"postinstall": "tsc -b",
 	"test": "rm -rf ./test/build && tsc -b test && cd test/build && node test/Suite.js"
   },
-  "author": "",
+  "repository": {
+	"type": "git",
+	"url": "https://github.com/tutao/tutanota.git",
+	"directory": "packages/licc"
+  },
+  "files": [
+	"dist/*",
+	"README.md",
+	"LICENSE.txt"
+  ],
+  "author": "nig, ivk",
   "license": "GPL-3.0",
   "dependencies": {
 	"zx": "6.1.0",

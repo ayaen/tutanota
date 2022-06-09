@@ -1,0 +1,178 @@
+import { Accumulator } from "./Accumulator.js";
+import { getArgs, minusculize } from "./common.js";
+import { parseType } from "./Parser.js";
+export class TypescriptGenerator {
+    generateGlobalDispatcher(name, facadeNames) {
+        const acc = new Accumulator();
+        for (let facadeName of facadeNames) {
+            acc.line(`import {${facadeName}} from "./${facadeName}.js"`);
+            acc.line(`import {${facadeName}ReceiveDispatcher} from "./${facadeName}ReceiveDispatcher.js"`);
+        }
+        acc.line();
+        acc.line(`export class ${name} {`);
+        const methodAcc = acc.indent();
+        for (let facadeName of facadeNames) {
+            methodAcc.line(`private readonly ${minusculize(facadeName)} : ${facadeName}ReceiveDispatcher`);
+        }
+        methodAcc.line(`constructor(`);
+        for (let facadeName of facadeNames) {
+            methodAcc.indent().line(`${minusculize(facadeName)} : ${facadeName},`);
+        }
+        methodAcc.line(`) {`);
+        for (let facadeName of facadeNames) {
+            methodAcc.indent().line(`this.${minusculize(facadeName)} = new ${facadeName}ReceiveDispatcher(${minusculize(facadeName)})`);
+        }
+        methodAcc.line("}");
+        methodAcc.line();
+        methodAcc.line(`async dispatch(facadeName: string, methodName: string, args: Array<any>) {`);
+        const switchAcc = methodAcc.indent();
+        switchAcc.line(`switch (facadeName) {`);
+        const caseAcc = switchAcc.indent();
+        for (let facadeName of facadeNames) {
+            caseAcc.line(`case "${facadeName}":`);
+            caseAcc.indent().line(`return this.${minusculize(facadeName)}.dispatch(methodName, args)`);
+        }
+        caseAcc.line(`default:`);
+        caseAcc.indent().line(`throw new Error("licc messed up! " + facadeName)`);
+        switchAcc.line(`}`);
+        methodAcc.line(`}`);
+        acc.line(`}`);
+        return acc.finish();
+    }
+    handleStructDefinition(definition) {
+        let acc = new Accumulator();
+        acc.line(`export interface ${definition.name} {`);
+        let bodyGenerator = acc.indent();
+        for (const [fieldName, fieldType] of Object.entries(definition.fields)) {
+            const { name, externals } = typeNameTypescript(fieldType);
+            for (const external of externals) {
+                acc.addImport(`import {${external}} from "./${external}.js"`);
+            }
+            bodyGenerator.line(`readonly ${fieldName}: ${name}`);
+        }
+        acc.line("}");
+        return acc.finish();
+    }
+    static generateNativeInterface(accumulator) {
+        // Duplicate interface to not import it
+        accumulator.line("interface NativeInterface {");
+        accumulator.indent().line("invokeNative(requestType: string, args: unknown[]): Promise<any>");
+        accumulator.line("}");
+    }
+    generateFacade(definition) {
+        const acc = new Accumulator();
+        acc.line(`export interface ${definition.name} {\n`);
+        let methodAccumulator = acc.indent();
+        for (const [name, method] of Object.entries(definition.methods)) {
+            methodAccumulator.line(`${name}(`);
+            let argAccumulator = methodAccumulator.indent();
+            for (const arg of getArgs(name, method)) {
+                const name = renderTypeAndAddImports(arg.type, acc);
+                argAccumulator.line(`${arg.name}: ${name},`);
+            }
+            const resolvedReturnType = renderTypeAndAddImports(method.ret, acc);
+            methodAccumulator.line(`): Promise<${resolvedReturnType}>`);
+            methodAccumulator.line();
+        }
+        acc.line("}");
+        return acc.finish();
+    }
+    generateReceiveDispatcher(definition) {
+        const acc = new Accumulator();
+        acc.line(`import {${definition.name}} from "./${definition.name}.js"`);
+        acc.line();
+        acc.line(`export class ${definition.name}ReceiveDispatcher {`);
+        acc.indent().line(`constructor(private readonly facade: ${definition.name}) {}`);
+        acc.indent().line(`async dispatch(method: string, arg: Array<any>) : Promise<any> {`);
+        acc.indent().indent().line(`switch(method) {`);
+        const switchAccumulator = acc.indent().indent().indent();
+        for (const [methodName, methodDef] of Object.entries(definition.methods)) {
+            switchAccumulator.line(`case "${methodName}": {`);
+            const arg = getArgs(methodName, methodDef);
+            const decodedArgs = [];
+            for (let i = 0; i < arg.length; i++) {
+                const { name: argName, type } = arg[i];
+                const renderedArgType = renderTypeAndAddImports(type, acc);
+                decodedArgs.push([argName, renderedArgType]);
+            }
+            for (let i = 0; i < arg.length; i++) {
+                const [argName, renderedType] = decodedArgs[i];
+                switchAccumulator.indent().line(`const ${argName}: ${renderedType} = arg[${i}]`);
+            }
+            switchAccumulator.indent().line(`return this.facade.${methodName}(`);
+            for (let i = 0; i < arg.length; i++) {
+                const [argName] = decodedArgs[i];
+                switchAccumulator.indent().indent().line(`${argName},`);
+            }
+            switchAccumulator.indent().line(`)`);
+            switchAccumulator.line(`}`);
+        }
+        acc.indent().indent().line(`}`);
+        acc.indent().line(`}`);
+        acc.line(`}`);
+        return acc.finish();
+    }
+    generateSendDispatcher(definition) {
+        const acc = new Accumulator();
+        acc.line(`import {${definition.name}} from "./${definition.name}.js"`);
+        acc.line();
+        TypescriptGenerator.generateNativeInterface(acc);
+        acc.line(`export class ${definition.name}SendDispatcher implements ${definition.name} {`);
+        acc.indent().line(`constructor(private readonly transport: NativeInterface) {}`);
+        for (const [methodName, _] of Object.entries(definition.methods)) {
+            const methodAccumulator = acc.indent();
+            methodAccumulator.line(`async ${methodName}(...args: Parameters<${definition.name}["${methodName}"]>) {`);
+            methodAccumulator.indent().line(`return this.transport.invokeNative("ipc",  ["${definition.name}", "${methodName}", ...args])`);
+            methodAccumulator.line(`}`);
+        }
+        acc.line(`}`);
+        return acc.finish();
+    }
+    generateExtraFiles() {
+        return {};
+    }
+}
+function renderTypescriptType(parsed) {
+    const { baseName, nullable, external } = parsed;
+    switch (baseName) {
+        case "List":
+            const renderedListInner = renderTypescriptType(parsed.generics[0]);
+            return {
+                externals: renderedListInner.externals,
+                name: maybeNullable(`ReadonlyArray<${renderedListInner.name}>`, nullable)
+            };
+        case "Map":
+            const renderedKey = renderTypescriptType(parsed.generics[0]);
+            const renderedValue = renderTypescriptType(parsed.generics[1]);
+            return {
+                externals: [...renderedKey.externals, ...renderedValue.externals],
+                name: maybeNullable(`Record<${renderedKey.name}, ${renderedValue.name}>`, nullable)
+            };
+        case "string":
+            return { externals: [], name: maybeNullable("string", nullable) };
+        case "boolean":
+            return { externals: [], name: maybeNullable("boolean", nullable) };
+        case "number":
+            return { externals: [], name: maybeNullable("number", nullable) };
+        case "bytes":
+            return { externals: [], name: maybeNullable("Uint8Array", nullable) };
+        case "void":
+            return { externals: [], name: maybeNullable("void", nullable) };
+        default:
+            return { externals: [baseName], name: maybeNullable(baseName, nullable) };
+    }
+}
+function maybeNullable(name, nullable) {
+    return nullable ? name + " | null" : name;
+}
+function typeNameTypescript(name) {
+    const parsed = parseType(name);
+    return renderTypescriptType(parsed);
+}
+function renderTypeAndAddImports(name, acc) {
+    const rendered = typeNameTypescript(name);
+    for (const external of rendered.externals) {
+        acc.addImport(`import {${external}} from "./${external}.js"`);
+    }
+    return rendered.name;
+}

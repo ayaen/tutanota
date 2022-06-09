@@ -62,9 +62,6 @@ import {OfflineDbFacade} from "../../desktop/db/OfflineDbFacade"
 import {ExposedCacheStorage} from "../worker/rest/EntityRestCache.js"
 import {InterWindowEventTypes} from "../../native/common/InterWindowEventTypes"
 import {LoginListener} from "./LoginListener"
-import {WebDesktopFacade} from "../../native/main/WebDesktopFacade"
-import {WebMobileFacade} from "../../native/main/WebMobileFacade.js"
-import {WebCommonNativeFacade} from "../../native/main/WebCommonNativeFacade.js"
 
 assertMainOrNode()
 
@@ -255,6 +252,10 @@ class MainLocator implements IMainLocator {
 			const webInterface: ExposedWebInterface = {
 				interWindowEventHandler: this._interWindowEventBus,
 			}
+
+			const {WebDesktopFacade} = await import("../../native/main/WebDesktopFacade")
+			const {WebMobileFacade} = await import("../../native/main/WebMobileFacade.js")
+			const {WebCommonNativeFacade} = await import("../../native/main/WebCommonNativeFacade.js")
 			this._nativeInterfaces = await createNativeInterfaces(
 				webInterface,
 				new WebMobileFacade(),

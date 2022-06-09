@@ -5,11 +5,9 @@ import type {NativeFileApp} from "../../native/common/FileApp"
 import {isBrowser} from "../common/Env"
 import {ProgrammingError} from "../common/error/ProgrammingError"
 import {ExposedWebInterface} from "../../native/common/NativeInterface"
-import {WebGlobalDispatcher} from "../../native/common/generatedipc/WebGlobalDispatcher"
 import {DesktopFacade} from "../../native/common/generatedipc/DesktopFacade"
 import {MobileFacade} from "../../native/common/generatedipc/MobileFacade.js"
 import {CommonNativeFacade} from "../../native/common/generatedipc/CommonNativeFacade.js"
-import {FileFacadeSendDispatcher} from "../../native/common/generatedipc/FileFacadeSendDispatcher.js"
 
 export type NativeInterfaces = {
 	native: NativeInterfaceMain
@@ -35,6 +33,8 @@ export async function createNativeInterfaces(
 		const {NativeFileApp} = await import("../../native/common/FileApp")
 		const {NativePushServiceApp} = await import("../../native/main/NativePushServiceApp")
 		const {NativeSystemApp} = await import("../../native/common/NativeSystemApp")
+		const {WebGlobalDispatcher} = await import("../../native/common/generatedipc/WebGlobalDispatcher")
+		const {FileFacadeSendDispatcher} = await import("../../native/common/generatedipc/FileFacadeSendDispatcher.js")
 		const dispatcher = new WebGlobalDispatcher(
 			commonNativeFacade,
 			desktopFacade,
