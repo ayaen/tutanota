@@ -8,6 +8,11 @@ import {ExposedWebInterface} from "../../native/common/NativeInterface"
 import {DesktopFacade} from "../../native/common/generatedipc/DesktopFacade"
 import {MobileFacade} from "../../native/common/generatedipc/MobileFacade.js"
 import {CommonNativeFacade} from "../../native/common/generatedipc/CommonNativeFacade.js"
+import {logins} from "./LoginController.js"
+import {CryptoFacade} from "../worker/crypto/CryptoFacade.js"
+import {EntityClient} from "../common/EntityClient.js"
+import {deviceConfig} from "../../misc/DeviceConfig.js"
+import {CalendarFacade} from "../worker/facades/CalendarFacade.js"
 
 export type NativeInterfaces = {
 	native: NativeInterfaceMain
@@ -27,6 +32,9 @@ export async function createNativeInterfaces(
 	mobileFacade: MobileFacade,
 	desktopFacade: DesktopFacade,
 	commonNativeFacade: CommonNativeFacade,
+	cryptoFacade: CryptoFacade,
+	calendarFacade: CalendarFacade,
+	entityClient: EntityClient,
 ): Promise<NativeInterfaces> {
 	if (!isBrowser()) {
 		const {NativeInterfaceMain} = await import("../../native/main/NativeInterfaceMain")
@@ -35,13 +43,15 @@ export async function createNativeInterfaces(
 		const {NativeSystemApp} = await import("../../native/common/NativeSystemApp")
 		const {WebGlobalDispatcher} = await import("../../native/common/generatedipc/WebGlobalDispatcher")
 		const {FileFacadeSendDispatcher} = await import("../../native/common/generatedipc/FileFacadeSendDispatcher.js")
+		const {NativePushFacadeSendDispatcher} = await import("../../native/common/generatedipc/NativePushFacadeSendDispatcher.js")
 		const dispatcher = new WebGlobalDispatcher(
 			commonNativeFacade,
 			desktopFacade,
 			mobileFacade,
 		)
 		const native = new NativeInterfaceMain(webInterface, dispatcher)
-		const pushService = new NativePushServiceApp(native)
+		const nativePushFacadeSendDispatcher = new NativePushFacadeSendDispatcher(native)
+		const pushService = new NativePushServiceApp(nativePushFacadeSendDispatcher, logins, cryptoFacade, entityClient, deviceConfig, calendarFacade)
 		const fileApp = new NativeFileApp(native, new FileFacadeSendDispatcher(native))
 		const systemApp = new NativeSystemApp(native, fileApp)
 		return {
