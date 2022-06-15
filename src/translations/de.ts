@@ -1466,6 +1466,8 @@ export default {
 		"yourCalendars_label": "Deine Kalender",
 		"yourFolders_action": "DEINE ORDNER",
 		"yourMessage_label": "Deine Nachricht",
-		"you_label": "Du"
+		"you_label": "Du",
+		"exportUsers_action": "Benutzer exportieren",
+		"importExport_action": "Importieren/exportieren"
 	}
 }

@@ -1449,3 +1449,5 @@ export type TranslationKeyType =
 	| "yourMessage_label"
 	| "you_label"
 	| "emptyString_msg"
+	| "exportUsers_action"
+	| "importExport_action"
