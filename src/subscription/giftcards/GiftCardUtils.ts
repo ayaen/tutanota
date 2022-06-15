@@ -166,7 +166,7 @@ export function showGiftCardToShare(giftCard: GiftCard) {
 							isAndroidApp()
 								? m(ButtonN, {
 									click: () => {
-										locator.systemApp.shareTextNative(
+										locator.systemFacade.shareText(
 											lang.get("nativeShareGiftCard_msg", {
 												"{link}": link,
 											}),
